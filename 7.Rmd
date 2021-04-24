@@ -7,6 +7,7 @@ output: pdf_document
 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
+library(tidyverse)
 library(MEMSS)
 library(lme4)
 ```
@@ -15,7 +16,27 @@ library(lme4)
 
 ### (a)
 
-```{r}
+Explain the data briefly.
+```{r load data, examine structure}
+#load data
+ergoStool <- ergoStool
 
+#examine the data structure
+str(ergoStool)
+```
+```{r summary}
+#data summary
+summary(ergoStool)
+```
+Inspection of the contingency table below reveals that the factors 'Type' and 'Subject' are completely crossed (i.e. there is at least one observation for each combination of factor levels). Further, this is an unreplicated design.
+```{r}
+xtabs(~Type + Subject, ergoStool)
+```
+### (b)
+
+```{r}
+ergoStool %>% 
+  ggplot(aes(x=effort, y=Subject, line=Type)) +
+  geom_point()
 ```
 
