@@ -10,6 +10,7 @@ knitr::opts_chunk$set(echo = TRUE)
 library(tidyverse)
 library(MEMSS)
 library(lme4)
+library(lattice)
 ```
 
 ### Problem 7
@@ -55,5 +56,18 @@ A linear mixed model with random effects for Type and Subject is fit below. The 
 ```{r}
 #fit a model with random effects for Type and Subject via REML
 summary(lmm_ergo <- lmer(effort ~ 1 + (1|Type) + (1|Subject), ergoStool))
+```
+### (d)
+
+The model from part (c) is refit using maximum likelihood estimation. The standard deviations for the estimates corresponding to Type, Subject and residual variability are now 1.305, 1.505, and 1.101. 
+```{r}
+summary(lmm_ergo2 <- update(lmm_ergo, REML=FALSE))
+```
+### (e)
+
+In the code-chunk below, the 95% prediction intervals corresponding to the random effects of the model from part (d) (i.e. the model fit via MLE) are generated. Based upon this plot, it is clear that stool type 1 (i.e. T1) outperforms the other types w.r.t. effort minimization.
+```{r}
+## Substitute the name of your fitted model for fm in the call to ranef)
+dotplot(ranef(lmm_ergo2, which = "Type", postVar = TRUE), aspect = 0.2, strip = FALSE)
 ```
 
