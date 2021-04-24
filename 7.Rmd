@@ -35,8 +35,23 @@ xtabs(~Type + Subject, ergoStool)
 ### (b)
 
 ```{r}
+#determine the average effort for each level of the factor Subject
+ergoStool %>%
+  group_by(Subject) %>%
+  summarize(avg_effort=mean(effort)) -> avg_effort_df
+
 ergoStool %>% 
-  ggplot(aes(x=effort, y=Subject, line=Type)) +
-  geom_point()
+  mutate(avg_effort=rep(avg_effort_df$avg_effort, each=4, times=1)) %>%
+  mutate(Subject=fct_reorder(Subject, avg_effort)) %>%
+  ggplot(aes(x=Subject, y=effort, shape=Type, color=Type)) +
+  geom_point() +
+  geom_line(aes(x=Subject, y=effort, group=Type, color=Type, linetype=Type))
+
+```
+
+### (c)
+
+```{r}
+
 ```
 
