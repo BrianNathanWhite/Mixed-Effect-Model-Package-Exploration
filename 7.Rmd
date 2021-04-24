@@ -51,7 +51,9 @@ ergoStool %>%
 
 ### (c)
 
+A linear mixed model with random effects for Type and Subject is fit below. The standard deviations for the estimates corresponding to Type, Subject and residual variability are 1.332, 1.695, and 1.100, as discerned from the output below.
 ```{r}
-
+#fit a model with random effects for Type and Subject via REML
+summary(lmm_ergo <- lmer(effort ~ 1 + (1|Type) + (1|Subject), ergoStool))
 ```
 
