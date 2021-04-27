@@ -71,3 +71,21 @@ In the code-chunk below, the 95% prediction intervals corresponding to the rando
 dotplot(ranef(lmm_ergo2, which = "Type", postVar = TRUE), aspect = 0.2, strip = FALSE)
 ```
 
+### (f)
+
+The significance of the random effect Type is assessed by comparing the model fit in Part (d) with a reduced model with only Subject as the random effect. Inspection of the anova output indicates a p-value of ~0. Thus, we fail to reject the null hypothesis $H_{0}:\sigma_{2}=0$.
+```{r}
+summary(lmm_ergo3 <- lmer(effort ~ 1 + (1|Subject), ergoStool, REML=FALSE))
+anova(lmm_ergo3, lmm_ergo2)
+```
+
+### (g)
+
+Since we are interested in making inference about four stool types, a more reasonable model
+is to treat Type as fix effects and Subject as the random effect. Fit this mixed effect model
+using maximum likelihood. Calculate the fixed-effects predictors for the four different stool types. Compare the results with that in Part (e).
+
+```{r}
+
+```
+
