@@ -17,7 +17,7 @@ library(lattice)
 
 ### (a)
 
-The data in ergoStool dataframe comes from an ergometrics experiment. In this experiment nine subjects were asked to sit on four stool, each with different design types, and rate the difficulty of rising. The experimenter opted to measure 'effort' via the Borg scale. This scale ranges from  6-20 with integer values (i.e. with greater values corresponding to greater perceived effort). Thus, the variable 'effort' is numeric and the remaining two variables are factors with levels corresponding to stool types and particular subjects.
+The data in the ergoStool dataframe comes from an ergometrics experiment. In this experiment nine subjects were asked to sit on four stools, each with a different design type, and rate the difficulty of rising. The experimenter opted to measure 'effort' via the Borg scale. This scale ranges from  6-20 with integer values (i.e. with greater values corresponding to greater perceived effort). Thus, there are 36 observations (i.e. 9 subjects x 4 stool types) and 3 variables. The variable 'effort' is numeric and the remaining two variables are factors with levels corresponding to stool types and particular subjects.
 
 ```{r load data, examine structure}
 #load data
@@ -37,6 +37,8 @@ xtabs(~Type + Subject, ergoStool)
 ```
 ### (b)
 
+The requested plot is output by the code-chunk below. Note, there is a minor irrelevant discrepancy between this plot and the corresponding plot in the package tutorial (i.e. the paths connecting points with the same Type level are not the same).
+
 ```{r}
 #determine the average effort for each level of the factor Subject
 ergoStool %>%
@@ -45,6 +47,7 @@ ergoStool %>%
 
 ergoStool %>% 
   mutate(avg_effort=rep(avg_effort_df$avg_effort, each=4, times=1)) %>%
+  #re-order the levels of Subject by avg_effort
   mutate(Subject=fct_reorder(Subject, avg_effort)) %>%
   ggplot(aes(x=effort, y=Subject, shape=Type, color=Type)) +
   geom_point() +
@@ -54,7 +57,7 @@ ergoStool %>%
 
 ### (c)
 
-A linear mixed model with random effects for Type and Subject is fit below. The standard deviations for the estimates corresponding to Type, Subject and residual variability are 1.332, 1.695, and 1.100, as discerned from the output below.
+A linear mixed model with random effects for Type and Subject is fit below. The standard deviations for the estimates corresponding to Type, Subject and residual variability are 1.332, 1.695, and 1.100, as discerned from the summary output.
 
 ```{r}
 library(lme4)
@@ -64,7 +67,7 @@ summary(lmm_ergo <- lmer(effort ~ 1 + (1|Type) + (1|Subject), ergoStool))
 ```
 ### (d)
 
-The model from part (c) is refit using maximum likelihood estimation. The standard deviations for the estimates corresponding to Type, Subject and residual variability are now 1.305, 1.505, and 1.101. 
+The model from part (c) is refit using maximum likelihood estimation. The standard deviations for the estimates corresponding to Type, Subject and residual variability are now 1.305, 1.505, and 1.101 (i.e. a decrease, relative to  the model in part (c) except for the residual standard deviation). 
 
 ```{r}
 summary(lmm_ergo2 <- update(lmm_ergo, REML=FALSE))
