@@ -17,10 +17,11 @@ library(lattice)
 
 ### (a)
 
-Explain the data briefly.
+The data in ergoStool dataframe comes from an ergometrics experiment. In this experiment nine subjects were asked to sit on four stool, each with different design types, and rate the difficulty of rising. The experimenter opted to measure 'effort' via the Borg scale. This scale ranges from  6-20 with integer values (i.e. with greater values corresponding to greater perceived effort). Thus, the variable 'effort' is numeric and the remaining two variables are factors with levels corresponding to stool types and particular subjects.
+
 ```{r load data, examine structure}
 #load data
-ergoStool <- ergoStool
+ergoStool <- MEMSS::ergoStool
 
 #examine the data structure
 str(ergoStool)
@@ -30,6 +31,7 @@ str(ergoStool)
 summary(ergoStool)
 ```
 Inspection of the contingency table below reveals that the factors 'Type' and 'Subject' are completely crossed (i.e. there is at least one observation for each combination of factor levels). Further, this is an unreplicated design.
+
 ```{r}
 xtabs(~Type + Subject, ergoStool)
 ```
@@ -44,28 +46,33 @@ ergoStool %>%
 ergoStool %>% 
   mutate(avg_effort=rep(avg_effort_df$avg_effort, each=4, times=1)) %>%
   mutate(Subject=fct_reorder(Subject, avg_effort)) %>%
-  ggplot(aes(x=Subject, y=effort, shape=Type, color=Type)) +
+  ggplot(aes(x=effort, y=Subject, shape=Type, color=Type)) +
   geom_point() +
-  geom_line(aes(x=Subject, y=effort, group=Type, color=Type, linetype=Type))
+  geom_line(aes(x=effort, y=Subject, group=Type, color=Type, linetype=Type))
 
 ```
 
 ### (c)
 
 A linear mixed model with random effects for Type and Subject is fit below. The standard deviations for the estimates corresponding to Type, Subject and residual variability are 1.332, 1.695, and 1.100, as discerned from the output below.
+
 ```{r}
+library(lme4)
+
 #fit a model with random effects for Type and Subject via REML
 summary(lmm_ergo <- lmer(effort ~ 1 + (1|Type) + (1|Subject), ergoStool))
 ```
 ### (d)
 
 The model from part (c) is refit using maximum likelihood estimation. The standard deviations for the estimates corresponding to Type, Subject and residual variability are now 1.305, 1.505, and 1.101. 
+
 ```{r}
 summary(lmm_ergo2 <- update(lmm_ergo, REML=FALSE))
 ```
 ### (e)
 
 In the code-chunk below, the 95% prediction intervals corresponding to the random effects of the model from part (d) (i.e. the model fit via MLE) are generated. Based upon this plot, it is clear that stool type 1 (i.e. T1) outperforms the other types w.r.t. effort minimization.
+
 ```{r}
 ## Substitute the name of your fitted model for fm in the call to ranef)
 dotplot(ranef(lmm_ergo2, which = "Type", postVar = TRUE), aspect = 0.2, strip = FALSE)
@@ -73,7 +80,8 @@ dotplot(ranef(lmm_ergo2, which = "Type", postVar = TRUE), aspect = 0.2, strip = 
 
 ### (f)
 
-The significance of the random effect Type is assessed by comparing the model fit in Part (d) with a reduced model with only Subject as the random effect. Inspection of the anova output indicates a p-value of ~0. Thus, we fail to reject the null hypothesis $H_{0}:\sigma_{2}=0$.
+The significance of the random effect Type is assessed by comparing the model fit in Part (d) with a reduced model with only Subject as the random effect. Inspection of the anova output indicates a p-value of approximately zero. Thus, we reject the null-hypothesis $H_{0}:\sigma_{2}=0$. This suggests that the more complex model, lmm_ergo2, fits the observed data better.
+
 ```{r}
 summary(lmm_ergo3 <- lmer(effort ~ 1 + (1|Subject), ergoStool, REML=FALSE))
 anova(lmm_ergo3, lmm_ergo2)
@@ -81,11 +89,12 @@ anova(lmm_ergo3, lmm_ergo2)
 
 ### (g)
 
-Since we are interested in making inference about four stool types, a more reasonable model
-is to treat Type as fix effects and Subject as the random effect. Fit this mixed effect model
-using maximum likelihood. Calculate the fixed-effects predictors for the four different stool types. Compare the results with that in Part (e).
+The model in question is fit below (i.e. 'Type' is treated as fixed and 'Subject' as random) via MLE. For the fixed-effect parameter estimates note the following: relative to the model fit in part (d) the intercept (TypeT1) has decreased. Further, while TypeT2, TypeT3 and TypeT4 are positive, their values are smaller than what is suggested by the mean effort for the corresponding stool types.
 
-```{r}
+```{r fixed effect for Type, random for Subject}
+lmm_ergo4 <- lmer(effort ~ 1 + Type + (1|Subject), ergoStool, REML = 0)
+summary(lmm_ergo4)
 
+ergoStool %>% group_by(Type) %>% summarise(mean_effort=mean(effort))
 ```
 
